@@ -30,4 +30,9 @@ graf2.add_vertex(2)
 graf = AdjacencyMatrix.create_wheel(5)
 print(graf.edges())
 
+for i in range(1000000000):
+    a = AdjacencyMatrix.create_wheel(5)
+    a.edges()
+
+
 

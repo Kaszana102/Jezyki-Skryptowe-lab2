@@ -27,7 +27,8 @@ void AddEdge(AdjacencyMatrix* self, int i, int j) {
 static void
 Custom_dealloc(AdjacencyMatrix* self)
 {    
-    Py_TYPE(self)->tp_free((PyObject*)self);
+    //printf("DEALLOC");
+    Py_TYPE(self)->tp_free((AdjacencyMatrix*)self);
 }
 
 static PyObject*
@@ -169,7 +170,8 @@ vertices_get(AdjacencyMatrix* self, PyObject* Py_UNUSED(ignored))
         if ((self->graph_vertices & (1 << i)) != 0) {
             PySet_Add(list, PyLong_FromSsize_t(i));
         }
-    }        
+    }       
+    //Py_DECREF(list);
     return list;
 }
 
@@ -258,9 +260,11 @@ edges(AdjacencyMatrix* self, PyObject* Py_UNUSED(ignored))
                 PyTuple_SetItem(tuple, 0, PyLong_FromLong(j));                
                 PyTuple_SetItem(tuple, 1, PyLong_FromLong(i));                
                 PySet_Add(list, tuple);                
+                Py_DECREF(tuple);
             }
         }
     }
+    //Py_DECREF(list);
     return list;
 }
 
