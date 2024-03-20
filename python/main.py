@@ -27,8 +27,7 @@ print("add_edge: " + str(graf.is_edge(0,3) == True))
 graf2 = Graph("DQc")
 graf2.add_vertex(2)
 #print(graf2.edges())
-
 graf = AdjacencyMatrix.create_wheel(5)
-a=2
+print(graf.edges())
 
 

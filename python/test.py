@@ -105,6 +105,8 @@ def test_of_operation_create_wheel( structure, g6_sequence ):
         try:
             g1, g2 = graphs.Graph.create_wheel( n ) , structure.create_wheel( n )
             if g1 != g2:
+                #print(g1.edges())
+                print(g2.edges())
                 print_error_and_quit( f"błędny wynik operacji dla parametru {n}" )
         except Exception as e:
             print_error_and_quit( f"podczas testu parametru {n} wystąpił wyjątek {e}" )

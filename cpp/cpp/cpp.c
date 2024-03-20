@@ -22,7 +22,7 @@ void AddEdge(AdjacencyMatrix* self, int i, int j) {
         j = temp;
     }
 
-    self->graph_adjacencyMatrix[i] |= 1 << j;
+    self->graph_adjacencyMatrix[i] |= (1 << j);
 }
 static void
 Custom_dealloc(AdjacencyMatrix* self)
@@ -50,8 +50,8 @@ Custom_init(AdjacencyMatrix* self, PyObject* args, PyObject* kwds)
 {
     static char* kwlist[] = { "text", NULL };    
 
-    char* bytes = "?";    
-    
+    char* bytes = "?";            
+
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|s", kwlist, &bytes)) 
         return -1;            
     int verticesNumber = bytes[0]-63;    
@@ -78,36 +78,45 @@ Custom_init(AdjacencyMatrix* self, PyObject* args, PyObject* kwds)
     return 0;
 }
 
+
+
 static PyObject*
-WheelInit(AdjacencyMatrix* self,
-    PyTypeObject* type,
+WheelInit(PyObject* Py_UNUSED(ignored),
+    PyTypeObject* defining_class,
     PyObject* const* args,
     Py_ssize_t nargs,
-    PyObject* kwds)
+    PyObject* kwnames)
 {
-    printf("DD");
-    //AdjacencyMatrix*  self = (AdjacencyMatrix*)type->tp_alloc(type, 0);
+ 
+    AdjacencyMatrix* self;
+    self = (AdjacencyMatrix*)defining_class->tp_alloc(defining_class, 0);
+    if (self != NULL) {
+        self->graph_vertices = 0;
+        for (int i = 0; i < 16; i++) {
+            self->graph_adjacencyMatrix[i] = 0;
+        }
+    }
+   
+    static char* kwlist[] = { "number_of_vertices", NULL };    
+    int number_of_vertices = 0;    
+
     
-    static char* kwlist[] = { "number_of_vertices", NULL };
-    int number_of_vertices = 0;
-    printf("AA\n");
-    //printf("%d\n",_unused_ignored);
-    
-    printf("%s\n", PyBytes_AS_STRING(PyUnicode_AsEncodedString(PyObject_Repr(kwds), "utf-8", "~E~")));
-    printf("D\n");
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &number_of_vertices)) {
-        printf("AAAA");
+    if (nargs < 1) {
+        printf("ERROR\n");
         Py_RETURN_NONE;
     }
-    printf("CC");
+    
+    number_of_vertices = PyLong_AsLong(args[0]);
+
     for (int i = 0; i < number_of_vertices; i++) {
-        self->graph_vertices |= 1 << i;
+        self->graph_vertices |= 1 << i; //add vertex
     }
     for (int j = 0; j < number_of_vertices; j++) {
-        self->graph_adjacencyMatrix[number_of_vertices - 1] |= 1 << j; //to center
-        AddEdge(self, j, (j + 1) % number_of_vertices);
-    }
-    printf("BB");
+        //self->graph_adjacencyMatrix[number_of_vertices - 1] |= 1 << j; //to center
+        AddEdge(self, j, number_of_vertices - 1);//to center        
+        AddEdge(self, j, (j + 1) % (number_of_vertices-1));//outer edge
+    }    
+    
     return self;
 }
 
@@ -242,7 +251,7 @@ static PyObject*
 edges(AdjacencyMatrix* self, PyObject* Py_UNUSED(ignored))
 {
     PyObject* list = PySet_New(NULL);
-    for (int i = 1; i < 15; i++) {
+    for (int i = 1; i < 16; i++) {
         for (int j = 0; j < i; j++) {
             if (((self->graph_adjacencyMatrix[i]) & (1 << j)) != 0) {
                 PyObject* tuple = PyTuple_New(2);                
@@ -322,7 +331,7 @@ static PyMethodDef Custom_methods[] = {
     {"add_edge", (PyCFunction)add_edge, METH_VARARGS | METH_KEYWORDS,""},
     {"delete_edge", (PyCFunction)delete_edge, METH_VARARGS | METH_KEYWORDS,""},
     {"print_matrix", (PyCFunction)print_matrix, METH_NOARGS,""},
-    {"create_wheel", (PyCMethod)WheelInit, METH_STATIC | METH_FASTCALL | METH_KEYWORDS  ,""},
+    {"create_wheel", (PyCMethod)WheelInit, METH_METHOD | METH_FASTCALL | METH_KEYWORDS | METH_CLASS  ,""},
     {NULL}  /* Sentinel */
 };
 #pragma endregion METHODS
@@ -343,8 +352,8 @@ static PyTypeObject AdjacencyMatrixType = {
 
 static PyModuleDef custommodule = {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "custom2",
-    .m_doc = "Example module that creates an extension type.",
+    .m_name = "AdjacencyMatrixModule",
+    .m_doc = "AdjacencyMatrix module made by Jakub Wierzba.",
     .m_size = -1,
 };
 
